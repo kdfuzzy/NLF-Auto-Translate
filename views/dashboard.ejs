@@ -1,60 +1,34 @@
 <%- include("layout", {
     title: "Dashboard",
     body: `
-    
-    <div class="flex items-center gap-4 mb-10">
-        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png"
-             class="w-20 h-20 rounded-full shadow-lg" />
 
-        <div>
-            <h1 class="text-3xl font-bold">Welcome, <%= user.username %>!</h1>
-            <p class="text-gray-400">Here is your overview.</p>
-        </div>
+<div class="flex items-center gap-4 mb-10">
+    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png"
+         class="w-20 h-20 rounded-full shadow-lg" />
+    <div>
+        <h1 class="text-3xl font-bold">Welcome, <%= user.username %>!</h1>
+        <p class="text-gray-400">Here's your overview.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+        <h2 class="text-xl font-semibold mb-3">Total Tickets</h2>
+        <p class="text-4xl font-bold text-purple-400"><%= stats.total %></p>
     </div>
 
-    <!-- DASHBOARD CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-        <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
-            <h2 class="text-xl font-semibold mb-4">Total Tickets</h2>
-            <p class="text-4xl font-bold text-indigo-400">124</p>
-        </div>
-
-        <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
-            <h2 class="text-xl font-semibold mb-4">Open Tickets</h2>
-            <p class="text-4xl font-bold text-yellow-400">7</p>
-        </div>
-
-        <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
-            <h2 class="text-xl font-semibold mb-4">Closed Tickets</h2>
-            <p class="text-4xl font-bold text-green-400">117</p>
-        </div>
-
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+        <h2 class="text-xl font-semibold mb-3">Open Tickets</h2>
+        <p class="text-4xl font-bold text-yellow-400"><%= stats.open %></p>
     </div>
 
-    <!-- QUICK ACTIONS -->
-    <div class="mt-12 bg-gray-800 p-8 rounded-xl shadow-xl">
-        <h2 class="text-2xl font-bold mb-4">Quick Actions</h2>
-
-        <div class="flex gap-6">
-
-            <a href="/tickets"
-                class="bg-indigo-600 px-6 py-3 rounded-md hover:bg-indigo-700 shadow-md">
-                View Tickets
-            </a>
-
-            <a href="/staff"
-                class="bg-purple-600 px-6 py-3 rounded-md hover:bg-purple-700 shadow-md">
-                Staff Tools
-            </a>
-
-            <a href="/settings"
-                class="bg-blue-600 px-6 py-3 rounded-md hover:bg-blue-700 shadow-md">
-                Bot Settings
-            </a>
-
-        </div>
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+        <h2 class="text-xl font-semibold mb-3">Closed Tickets</h2>
+        <p class="text-4xl font-bold text-green-400"><%= stats.closed %></p>
     </div>
 
-    `
+</div>
+
+`
 }) %>
