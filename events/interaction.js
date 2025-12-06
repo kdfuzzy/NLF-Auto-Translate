@@ -4,50 +4,53 @@ module.exports = {
     name: "interactionCreate",
 
     async execute(interaction, client) {
-        // Reload config every interaction
-        client.config = loadJSON("./config/config.json");
-        const config = client.config;
 
-        // ------------------------
-        // BUTTON HANDLERS
-        // ------------------------
+        const config = loadJSON("./config/config.json");
+
+        // ---------------------------------------------------
+        // BUTTON HANDLER
+        // ---------------------------------------------------
         if (interaction.isButton()) {
             const btn = client.buttons.get(interaction.customId);
 
             if (!btn) {
                 console.log("❌ Button not found:", interaction.customId);
-                return interaction.reply({ content: "❌ Button error.", ephemeral: true });
+                return interaction.reply({ content: "Button not found.", ephemeral: true });
             }
 
             return btn.execute(interaction, client, config);
         }
 
-        // ------------------------
-        // SELECT MENU HANDLERS
-        // ------------------------
+        // ---------------------------------------------------
+        // SELECT MENU HANDLER
+        // ---------------------------------------------------
         if (interaction.isStringSelectMenu()) {
+
+            console.log("⚡ Select menu triggered:", interaction.customId);
+
             if (interaction.customId === "ticket_menu") {
-                console.log("🎉 Dropdown selection received!");
                 const handler = require("../commands/panelHandler");
                 return handler.execute(interaction, client, config);
             }
+
+            return interaction.reply({ content: "Unknown select menu.", ephemeral: true });
         }
 
-        // ------------------------
-        // SLASH COMMAND HANDLERS
-        // ------------------------
+        // ---------------------------------------------------
+        // SLASH COMMAND HANDLER
+        // ---------------------------------------------------
         if (interaction.isChatInputCommand()) {
-            const cmd = client.commands.get(interaction.commandName);
+            const command = client.commands.get(interaction.commandName);
 
-            if (!cmd) {
-                return interaction.reply({ content: "❌ Command not found.", ephemeral: true });
+            if (!command) {
+                return interaction.reply({ content: "Command not found!", ephemeral: true });
             }
 
             try {
-                return cmd.execute(interaction, client, config);
+                return command.execute(interaction, client, config);
             } catch (err) {
-                console.error(err);
-                return interaction.reply({ content: "⚠️ Command error", ephemeral: true });
+                console.log("❌ Command Error:", err);
+                return interaction.reply({ content: "Command failed.", ephemeral: true });
             }
         }
     }
