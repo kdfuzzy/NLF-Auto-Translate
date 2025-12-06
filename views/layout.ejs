@@ -8,19 +8,21 @@
 
 <body class="bg-gray-900 text-white flex">
 
-<aside class="w-64 bg-gradient-to-b from-indigo-600 to-purple-700 p-6">
+<aside class="w-64 bg-gradient-to-b from-indigo-600 to-purple-700 p-6 min-h-screen">
     <h1 class="text-2xl font-bold">NLF Panel</h1>
-    <nav class="flex flex-col gap-3 mt-6">
+
+    <nav class="flex flex-col gap-3 mt-6 text-lg">
         <a href="/" class="hover:text-gray-300">🏠 Home</a>
         <a href="/dashboard" class="hover:text-gray-300">📊 Dashboard</a>
         <a href="/tickets" class="hover:text-gray-300">🎟 Tickets</a>
-        <a href="/staff" class="hover:text-gray-300">🛠 Staff</a>
+        <a href="/staff" class="hover:text-gray-300">🛠 Staff Panel</a>
         <a href="/settings" class="hover:text-gray-300">⚙ Settings</a>
         <a href="/logout" class="hover:text-gray-300 mt-4">🚪 Logout</a>
     </nav>
 </aside>
 
 <main class="flex-1 p-10">
+    <!-- This is where page content goes -->
     <%- body %>
 </main>
 
