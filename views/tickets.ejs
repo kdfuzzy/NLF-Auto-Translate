@@ -1,4 +1,4 @@
-<%- include("layout", { title: "Tickets" }) %>
+<%- include("layout", { title: "Tickets", body: "" }) %>
 
 <h1 class="text-3xl font-bold mb-6">All Tickets</h1>
 
@@ -9,7 +9,7 @@
     <th class="p-4">User</th>
     <th class="p-4">Type</th>
     <th class="p-4">Status</th>
-    <th class="p-4">Action</th>
+    <th class="p-4">Open</th>
 </tr>
 </thead>
 
@@ -19,20 +19,11 @@
     <td class="p-4"><%= t.id %></td>
     <td class="p-4"><%= t.username %></td>
     <td class="p-4"><%= t.type %></td>
-
-    <td class="p-4">
-        <% if (t.status === "open") { %>
-            <span class="text-yellow-400 font-semibold">Open</span>
-        <% } else { %>
-            <span class="text-green-400 font-semibold">Closed</span>
-        <% } %>
-    </td>
+    <td class="p-4"><%= t.status %></td>
 
     <td class="p-4">
         <a href="https://discord.com/channels/<%= guild %>/<%= t.channel %>"
-           class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700">
-           Open Channel
-        </a>
+           class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700">Open</a>
     </td>
 </tr>
 <% }) %>
