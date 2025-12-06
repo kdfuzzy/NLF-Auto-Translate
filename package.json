@@ -1,15 +1,16 @@
 {
-  "name": "discord-translator",
+  "name": "nlf-bot",
   "version": "1.0.0",
-  "description": "Live French ↔ English translator bot",
+  "description": "NLF bot with ticket system + dashboard",
   "main": "bot.js",
-  "type": "commonjs",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js && node dashboard.js"
   },
   "dependencies": {
-    "@iamtraction/google-translate": "^1.1.2",
-    "discord.js": "^14.13.0",
-    "dotenv": "^16.3.1"
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "discord-oauth2": "^2.10.0",
+    "ejs": "^3.1.9"
   }
 }
