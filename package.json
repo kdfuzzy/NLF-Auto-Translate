@@ -13,5 +13,8 @@
     "discord-oauth2": "^2.10.0",
     "ejs": "^3.1.10",
     "dotenv": "^16.3.1"
+    "@iamtraction/google-translate": "^1.2.0"
+
   }
 }
+
