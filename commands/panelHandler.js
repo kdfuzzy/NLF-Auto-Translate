@@ -22,7 +22,7 @@ module.exports = {
             return interaction.reply({ content: "❌ Ticket category not set in config.", ephemeral: true });
         }
 
-        // Create ticket channel
+        // Create the ticket channel (no overwrites yet)
         const channel = await guild.channels.create({
             name: `ticket-${user.username}`.toLowerCase(),
             type: ChannelType.GuildText,
@@ -30,25 +30,15 @@ module.exports = {
             topic: `Ticket opened by ${user.tag}`
         });
 
-        // Permission overwrites
-        await channel.permissionOverwrites.set([
-            {
-                id: guild.id,
-                deny: [PermissionFlagsBits.ViewChannel]
-            },
-            {
-                id: user.id,
-                allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory
-                ]
-            },
-            {
-                id: client.user.id,
-                allow: [PermissionFlagsBits.ViewChannel]
-            }
-        ]);
+        // 🔥 Sync category permissions
+        await channel.lockPermissions();
+
+        // Allow the user to see their own ticket
+        await channel.permissionOverwrites.edit(user.id, {
+            ViewChannel: true,
+            SendMessages: true,
+            ReadMessageHistory: true
+        });
 
         // Create embed
         const embed = new EmbedBuilder()
@@ -57,7 +47,7 @@ module.exports = {
                 { name: "Type", value: ticketType, inline: true },
                 { name: "User", value: `<@${user.id}>`, inline: true }
             )
-            .setDescription("Please describe your issue. A staff member will assist you shortly.")
+            .setDescription("Please describe your situation. Staff will assist you soon.")
             .setColor("Blue")
             .setTimestamp();
 
