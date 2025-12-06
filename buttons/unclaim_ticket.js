@@ -1,16 +1,20 @@
 module.exports = {
     id: "unclaim_ticket",
 
-    async execute(interaction, client, config) {
-        const member = interaction.member;
-
-        if (!member.roles.cache.some(r => config.staffRoles.includes(r.id))) {
-            return interaction.reply({ content: "❌ You must be staff to unclaim tickets.", ephemeral: true });
-        }
-
+    async execute(interaction) {
         const channel = interaction.channel;
 
-        await channel.setTopic(null);
-        interaction.reply("🔄 Ticket unclaimed.");
+        if (!channel.topic?.includes("Claimed by:")) {
+            return interaction.reply({
+                content: "❌ This ticket is not claimed.",
+                ephemeral: true
+            });
+        }
+
+        await channel.setTopic(channel.topic.replace(/ \| Claimed by: .+/, ""));
+
+        return interaction.reply({
+            content: `🟦 Ticket unclaimed.`,
+        });
     }
 };
