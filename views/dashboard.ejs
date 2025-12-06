@@ -1,28 +1,31 @@
-<%- include("layout", {
-title: "Dashboard",
-body: `
+<%- include("layout", { title: "Dashboard" }) %>
+
 <div class="flex items-center gap-4 mb-10">
-    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar ?? '0' %>.png"
+    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar || '0' %>.png"
          onerror="this.src='https://cdn.discordapp.com/embed/avatars/1.png'"
          class="w-20 h-20 rounded-full" />
+
     <div>
         <h1 class="text-3xl font-bold">Welcome, <%= user.username %>!</h1>
+        <p class="text-gray-400">Here is your overview.</p>
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-gray-800 p-6 rounded-xl shadow">
-        <h2>Total Tickets</h2>
-        <p class="text-3xl"><%= stats.total %></p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl mb-2 font-semibold">Total Tickets</h2>
+        <p class="text-4xl font-bold text-purple-400"><%= stats.total %></p>
     </div>
-    <div class="bg-gray-800 p-6 rounded-xl shadow">
-        <h2>Open</h2>
-        <p class="text-3xl text-yellow-400"><%= stats.open %></p>
+
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl mb-2 font-semibold">Open Tickets</h2>
+        <p class="text-4xl font-bold text-yellow-400"><%= stats.open %></p>
     </div>
-    <div class="bg-gray-800 p-6 rounded-xl shadow">
-        <h2>Closed</h2>
-        <p class="text-3xl text-green-400"><%= stats.closed %></p>
+
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h2 class="text-xl mb-2 font-semibold">Closed Tickets</h2>
+        <p class="text-4xl font-bold text-green-400"><%= stats.closed %></p>
     </div>
+
 </div>
-`
-}) %>
