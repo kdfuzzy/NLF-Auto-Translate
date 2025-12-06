@@ -2,13 +2,14 @@ const { loadJSON } = require("../utils/fileManager");
 
 module.exports = {
     name: "interactionCreate",
+
     async execute(interaction, client) {
 
         const config = loadJSON("./config/config.json");
 
-        // ----------------------------------
-        // BUTTONS
-        // ----------------------------------
+        // -------------------------------------
+        // BUTTON HANDLERS
+        // -------------------------------------
         if (interaction.isButton()) {
             const button = client.buttons.get(interaction.customId);
 
@@ -17,49 +18,44 @@ module.exports = {
                 return interaction.reply({ content: "Button not found.", ephemeral: true });
             }
 
-            try {
-                return button.execute(interaction, client, config);
-            } catch (err) {
-                console.error(err);
-                return interaction.reply({ content: "Button error.", ephemeral: true });
-            }
+            return button.execute(interaction, client, config);
         }
 
-        // ----------------------------------
-        // SELECT MENUS
-        // ----------------------------------
+        // -------------------------------------
+        // SELECT MENU HANDLERS
+        // -------------------------------------
         if (interaction.isStringSelectMenu()) {
 
-            console.log("📥 Select Menu Triggered:", interaction.customId);
+            console.log("⚡ Select menu triggered:", interaction.customId);
 
             if (interaction.customId === "ticket_menu") {
-                try {
-                    const handler = require("../commands/panelHandler");
-                    return handler.execute(interaction, client, config);
-                } catch (err) {
-                    console.error(err);
-                    return interaction.reply({ content: "Select menu error.", ephemeral: true });
-                }
+                const handler = require("../commands/panelHandler");
+                return handler.execute(interaction, client, config);
             }
 
-            return interaction.reply({ content: "Unknown menu.", ephemeral: true });
+            return interaction.reply({
+                content: "Unknown menu.",
+                ephemeral: true
+            });
         }
 
-        // ----------------------------------
-        // SLASH COMMANDS
-        // ----------------------------------
+        // -------------------------------------
+        // SLASH COMMAND HANDLERS
+        // -------------------------------------
         if (interaction.isChatInputCommand()) {
             const command = client.commands.get(interaction.commandName);
 
-            if (!command) {
+            if (!command)
                 return interaction.reply({ content: "Command not found.", ephemeral: true });
-            }
 
             try {
                 return command.execute(interaction, client, config);
             } catch (err) {
-                console.log("❌ Command Error:", err);
-                return interaction.reply({ content: "Command failed.", ephemeral: true });
+                console.error(err);
+                return interaction.reply({
+                    content: "Error executing command.",
+                    ephemeral: true
+                });
             }
         }
     }
