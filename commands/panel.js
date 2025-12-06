@@ -1,4 +1,9 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
+const {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ActionRowBuilder,
+    StringSelectMenuBuilder
+} = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,21 +12,24 @@ module.exports = {
 
     async execute(interaction) {
 
+        const embed = new EmbedBuilder()
+            .setColor("Blue")
+            .setTitle("🎟 Open a Ticket")
+            .setDescription("Select the type of ticket below:");
+
         const menu = new StringSelectMenuBuilder()
             .setCustomId("ticket_menu")
-            .setPlaceholder("📬 Select the type of ticket you want to open")
+            .setPlaceholder("Choose ticket type")
             .addOptions([
-                { label: "Join NLF", value: "join" },
-                { label: "Ally Request", value: "ally" },
-                { label: "Report / Support", value: "support" },
-                { label: "Staff Application", value: "staff" }
+                { label: "Join NLF", value: "Join NLF" },
+                { label: "Ally Request", value: "Ally Request" },
+                { label: "Support", value: "Support" },
+                { label: "Report User", value: "Report User" },
+                { label: "Staff Application", value: "Staff Application" }
             ]);
 
         const row = new ActionRowBuilder().addComponents(menu);
 
-        await interaction.reply({
-            content: "🎫 **Open a ticket by selecting an option below:**",
-            components: [row]
-        });
+        await interaction.reply({ embeds: [embed], components: [row] });
     }
 };
