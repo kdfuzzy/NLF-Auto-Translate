@@ -1,4 +1,6 @@
 // commands/panelHandler.js
+const ticketDB = loadJSON("./stats/tickets.json");
+
 const {
     ChannelType,
     PermissionFlagsBits,
