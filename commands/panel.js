@@ -6,6 +6,7 @@ module.exports = {
         .setDescription("Send the ticket panel"),
 
     async execute(interaction) {
+
         const menu = new StringSelectMenuBuilder()
             .setCustomId("ticket_menu")
             .setPlaceholder("📬 Select the type of ticket you want to open")
@@ -24,4 +25,3 @@ module.exports = {
         });
     }
 };
-
