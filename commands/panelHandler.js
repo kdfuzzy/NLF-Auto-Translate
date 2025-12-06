@@ -1,6 +1,3 @@
-// commands/panelHandler.js
-const ticketDB = loadJSON("./stats/tickets.json");
-
 const {
     ChannelType,
     PermissionFlagsBits,
@@ -10,70 +7,47 @@ const {
     ButtonStyle
 } = require("discord.js");
 
-const { loadJSON, saveJSON } = require("../utils/fileManager");
+const { loadJSON } = require("../utils/fileManager");
 
 module.exports = {
     async execute(interaction, client) {
 
-        // Load config & stats
         const config = loadJSON("./config/config.json");
-        const ticketCounter = loadJSON("./stats/ticketCounter.json");
-
         const guild = interaction.guild;
         const user = interaction.user;
         const ticketType = interaction.values[0];
 
         if (!config.ticketCategory) {
             return interaction.reply({
-                content: "❌ Ticket category is not set. Use `/setticketcategory`.",
+                content: "❌ Ticket category is not set. Use `/setticketcategory` first.",
                 ephemeral: true
             });
         }
 
-        // ---------------------------------------
-        // 1️⃣ GENERATE NEW TICKET ID
-        // ---------------------------------------
-        const newID = (ticketCounter.lastID || 0) + 1;
-        ticketCounter.lastID = newID;
-        saveJSON("./stats/ticketCounter.json", ticketCounter);
-
-        // Format username cleanly
-        const cleanUser = user.username.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-        // Channel name with ID included
-        const channelName = `ticket-${newID}-${cleanUser}`;
-
-        // ---------------------------------------
-        // 2️⃣ CREATE CHANNEL WITH SYNCED PERMISSIONS
-        // ---------------------------------------
+        // Create synced channel
         const channel = await guild.channels.create({
-            name: channelName,
+            name: `ticket-${user.username}`,
             type: ChannelType.GuildText,
-            parent: config.ticketCategory,
-            topic: `Ticket #${newID} opened by ${user.tag} (${user.id})`
+            parent: config.ticketCategory, // SYNC PERMISSIONS
+            topic: `Ticket opened by ${user.tag}`
         });
 
-        // Allow ticket opener
+        // Allow the user to view their ticket
         await channel.permissionOverwrites.edit(user.id, {
             ViewChannel: true,
             SendMessages: true,
             ReadMessageHistory: true
         });
 
-        // ---------------------------------------
-        // 3️⃣ WELCOME EMBED
-        // ---------------------------------------
+        // Ticket embed
         const embed = new EmbedBuilder()
             .setColor("Blue")
-            .setTitle(`🎟 Ticket #${newID}`)
+            .setTitle("🎟 New Ticket Created")
             .addFields(
-                { name: "📌 Type", value: ticketType, inline: true },
-                { name: "👤 Opened By", value: `<@${user.id}>`, inline: true }
+                { name: "📌 Ticket Type", value: ticketType, inline: true },
+                { name: "👤 User", value: `<@${user.id}>`, inline: true }
             )
-            .setDescription(
-                "Please describe your issue in detail.\n" +
-                "A staff member will assist you shortly."
-            )
+            .setDescription("A staff member will assist you shortly.")
             .setTimestamp();
 
         // Buttons
@@ -86,19 +60,8 @@ module.exports = {
 
         await channel.send({ embeds: [embed], components: [buttons] });
 
-        // ---------------------------------------
-        // 4️⃣ STAFF AUTO-PING (IF ENABLED)
-        // ---------------------------------------
-        if (config.staffRoles.length > 0) {
-            const pings = config.staffRoles.map(r => `<@&${r}>`).join(" ");
-            await channel.send(`📢 **Staff Alert:** ${pings}\nA new ticket (#${newID}) has been opened.`);
-        }
-
-        // ---------------------------------------
-        // 5️⃣ USER CONFIRMATION
-        // ---------------------------------------
         return interaction.reply({
-            content: `🎫 **Ticket #${newID}** has been created: ${channel}`,
+            content: `🎫 Ticket opened: ${channel}`,
             ephemeral: true
         });
     }
