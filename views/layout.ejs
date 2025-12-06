@@ -4,36 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | NLF Dashboard</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        .sidebar-gradient {
-            background: linear-gradient(180deg, #4f46e5, #6d28d9);
-        }
-    </style>
 </head>
 
 <body class="bg-gray-900 text-white flex">
-
-    <!-- SIDEBAR -->
-    <aside class="w-64 min-h-screen sidebar-gradient p-6 flex flex-col gap-6 shadow-xl">
+    <aside class="w-64 bg-gradient-to-b from-indigo-600 to-purple-700 p-6 shadow-lg">
         <h1 class="text-2xl font-bold">NLF Panel</h1>
 
-        <nav class="flex flex-col gap-3 text-lg">
+        <nav class="flex flex-col gap-3 mt-6">
             <a href="/" class="hover:text-gray-300">🏠 Home</a>
             <a href="/dashboard" class="hover:text-gray-300">📊 Dashboard</a>
             <a href="/tickets" class="hover:text-gray-300">🎟 Tickets</a>
             <a href="/staff" class="hover:text-gray-300">🛠 Staff Panel</a>
-            <a href="/settings" class="hover:text-gray-300">⚙️ Settings</a>
+            <a href="/settings" class="hover:text-gray-300">⚙ Settings</a>
             <a href="/logout" class="hover:text-gray-300 mt-4">🚪 Logout</a>
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 p-10">
         <%- body %>
     </main>
-
 </body>
 </html>
