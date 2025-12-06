@@ -1,16 +1,16 @@
-<%- include("layout", { title: "Settings" }) %>
+<%- include("layout", { title: "Settings", body: "" }) %>
 
 <h1 class="text-3xl font-bold mb-6">Bot Settings</h1>
 
 <form action="/save-settings" method="POST" class="bg-gray-800 p-6 rounded-xl">
+    
+    <label class="block mb-2">Ticket Category ID</label>
+    <input name="ticketCategory"
+           value="<%= config.ticketCategory %>"
+           class="w-full p-3 bg-gray-700 rounded mb-6">
 
-<label class="block mb-2 text-lg font-semibold">Ticket Category ID</label>
-<input name="ticketCategory"
-       value="<%= config.ticketCategory %>"
-       class="w-full p-3 rounded bg-gray-700 mb-6">
-
-<button class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">
-    Save Settings
-</button>
+    <button class="bg-blue-600 px-6 py-3 rounded hover:bg-blue-700">
+        Save Settings
+    </button>
 
 </form>
