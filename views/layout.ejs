@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %> | NLF Dashboard</title>
 
-    <!-- TailwindCSS -->
+    <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Custom Gradient Theme -->
+    <!-- Gradient & Additional Styles -->
     <style>
         .sidebar-gradient {
             background: linear-gradient(180deg, #4f46e5, #6d28d9);
@@ -23,17 +23,31 @@
         <h1 class="text-2xl font-bold">NLF Panel</h1>
 
         <nav class="flex flex-col gap-3 text-lg">
-            <a href="/" class="hover:text-gray-300">🏠 Home</a>
-            <a href="/dashboard" class="hover:text-gray-300">📊 Dashboard</a>
-            <a href="/tickets" class="hover:text-gray-300">🎟 Tickets</a>
-            <a href="/staff" class="hover:text-gray-300">🛠 Staff Panel</a>
-            <a href="/logout" class="hover:text-gray-300 mt-4">🚪 Logout</a>
+            <a href="/" class="hover:text-gray-300 flex items-center gap-2">
+                🏠 Home
+            </a>
+
+            <a href="/dashboard" class="hover:text-gray-300 flex items-center gap-2">
+                📊 Dashboard
+            </a>
+
+            <a href="/tickets" class="hover:text-gray-300 flex items-center gap-2">
+                🎟 Tickets
+            </a>
+
+            <a href="/staff" class="hover:text-gray-300 flex items-center gap-2">
+                🛠 Staff Panel
+            </a>
+
+            <a href="/logout" class="hover:text-gray-300 mt-4 flex items-center gap-2">
+                🚪 Logout
+            </a>
         </nav>
     </aside>
 
-    <!-- CONTENT -->
+    <!-- MAIN CONTENT -->
     <main class="flex-1 p-10">
-        <%= body %>
+        <%- body %> <!-- IMPORTANT: Renders HTML, not escaped text -->
     </main>
 
 </body>
