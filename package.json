@@ -1,18 +1,17 @@
 {
   "name": "nlf-bot",
   "version": "1.0.0",
-  "description": "NLF bot with ticket system + dashboard",
+  "description": "NLF Auto Translator + Ticket Bot + Dashboard",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js && node dashboard.js"
+    "start": "node bot.js & node dashboard.js"
   },
-"dependencies": {
-  "discord.js": "^14.14.1",
-  "express": "^4.18.2",
-  "express-session": "^1.17.3",
-  "discord-oauth2": "^2.10.0",
-  "ejs": "^3.1.10",
-  "dotenv": "^16.3.1"
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "discord-oauth2": "^2.10.0",
+    "ejs": "^3.1.10",
+    "dotenv": "^16.3.1"
+  }
 }
-
-
