@@ -2,40 +2,44 @@ const express = require("express");
 const session = require("express-session");
 const OAuth = require("discord-oauth2");
 const path = require("path");
-const bodyParser = require("body-parser");
 const fs = require("fs");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const app = express();
 
-// Utility to load/save JSON
-function loadJSON(path) {
-    return JSON.parse(fs.readFileSync(path, "utf8"));
+// ---------- SAFE JSON LOADERS ----------
+function safeLoad(path, fallback) {
+    try {
+        if (!fs.existsSync(path)) return fallback;
+        const data = JSON.parse(fs.readFileSync(path, "utf8"));
+        return data || fallback;
+    } catch {
+        return fallback;
+    }
 }
-function saveJSON(path, data) {
+
+function safeSave(path, data) {
     fs.writeFileSync(path, JSON.stringify(data, null, 4));
 }
 
-// Databases
-let config = loadJSON("./config/config.json");
-let ticketDB = loadJSON("./stats/tickets.json");
+// ---------- LOAD DATABASES SAFELY ----------
+let config = safeLoad("./config/config.json", { ticketCategory: "" });
+let ticketDB = safeLoad("./stats/tickets.json", { tickets: {} });
 
-// OAUTH SETUP
+// ---------- OAUTH ----------
 const oauth = new OAuth({
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     redirectUri: process.env.REDIRECT_URI
 });
 
-// VIEW ENGINE
+// ---------- EXPRESS SETTINGS ----------
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-
-// STATIC FILES
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// SESSION
 app.use(
     session({
         secret: "NLFSecretKey",
@@ -44,18 +48,18 @@ app.use(
     })
 );
 
-// 🔹 MIDDLEWARE — REQUIRE LOGIN
+// ---------- LOGIN MIDDLEWARE ----------
 function requireAuth(req, res, next) {
     if (!req.session.user) return res.redirect("/login");
     next();
 }
 
-// HOME PAGE
+// ---------- HOME ----------
 app.get("/", (req, res) => {
     res.render("home");
 });
 
-// LOGIN
+// ---------- LOGIN ----------
 app.get("/login", (req, res) => {
     const url = oauth.generateAuthUrl({
         scope: ["identify"],
@@ -64,25 +68,29 @@ app.get("/login", (req, res) => {
     res.redirect(url);
 });
 
-// CALLBACK
+// ---------- CALLBACK ----------
 app.get("/callback", async (req, res) => {
-    if (req.query.error) return res.send("OAuth error: " + req.query.error);
+    try {
+        if (req.query.error) return res.send("OAuth error: " + req.query.error);
 
-    const token = await oauth.tokenRequest({
-        code: req.query.code,
-        scope: ["identify"],
-        grantType: "authorization_code"
-    });
+        const token = await oauth.tokenRequest({
+            code: req.query.code,
+            scope: ["identify"],
+            grantType: "authorization_code"
+        });
 
-    const user = await oauth.getUser(token.access_token);
-    req.session.user = user;
+        const user = await oauth.getUser(token.access_token);
+        req.session.user = user;
 
-    res.redirect("/dashboard");
+        res.redirect("/dashboard");
+    } catch (e) {
+        res.send("OAuth failed: " + e.message);
+    }
 });
 
-// 🌟 MAIN DASHBOARD PAGE
+// ---------- DASHBOARD ----------
 app.get("/dashboard", requireAuth, (req, res) => {
-    const tickets = Object.values(ticketDB.tickets);
+    const tickets = Object.values(ticketDB.tickets || {});
 
     const stats = {
         total: tickets.length,
@@ -96,20 +104,22 @@ app.get("/dashboard", requireAuth, (req, res) => {
     });
 });
 
-// 🎟 TICKET LIST PAGE
+// ---------- TICKETS PAGE ----------
 app.get("/tickets", requireAuth, (req, res) => {
+    const tickets = Object.values(ticketDB.tickets || {});
+
     res.render("tickets", {
         user: req.session.user,
-        tickets: Object.values(ticketDB.tickets),
-        guild: process.env.GUILD_ID
+        tickets,
+        guild: process.env.GUILD_ID || ""
     });
 });
 
-// 🛠 STAFF LEADERBOARD PAGE
+// ---------- STAFF PAGE ----------
 app.get("/staff", requireAuth, (req, res) => {
     const staffStats = {};
 
-    for (let t of Object.values(ticketDB.tickets)) {
+    for (let t of Object.values(ticketDB.tickets || {})) {
         if (!t.claimedBy) continue;
 
         if (!staffStats[t.claimedBy]) {
@@ -135,7 +145,7 @@ app.get("/staff", requireAuth, (req, res) => {
     });
 });
 
-// ⚙ BOT SETTINGS PAGE
+// ---------- SETTINGS PAGE ----------
 app.get("/settings", requireAuth, (req, res) => {
     res.render("settings", {
         user: req.session.user,
@@ -143,22 +153,21 @@ app.get("/settings", requireAuth, (req, res) => {
     });
 });
 
-// ⚙ SAVE SETTINGS
+// ---------- SAVE SETTINGS ----------
 app.post("/save-settings", requireAuth, (req, res) => {
-    config.ticketCategory = req.body.ticketCategory;
-    saveJSON("./config/config.json", config);
-
+    config.ticketCategory = req.body.ticketCategory || config.ticketCategory;
+    safeSave("./config/config.json", config);
     res.redirect("/settings");
 });
 
-// LOGOUT
+// ---------- LOGOUT ----------
 app.get("/logout", (req, res) => {
     req.session.destroy(() => {
         res.redirect("/");
     });
 });
 
-// START SERVER
+// ---------- START ----------
 app.listen(process.env.PORT || 3000, () =>
     console.log("🌐 Dashboard running on port " + (process.env.PORT || 3000))
 );
