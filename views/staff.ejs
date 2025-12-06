@@ -1,27 +1,23 @@
-<%- include("layout", {
-title: "Staff Panel",
-body: `
+<%- include("layout", { title: "Staff Panel" }) %>
+
 <h1 class="text-3xl font-bold mb-6">Staff Leaderboard</h1>
 
 <table class="w-full bg-gray-800 rounded-xl overflow-hidden">
 <thead class="bg-gray-700">
 <tr>
-    <th class="p-3">Staff ID</th>
-    <th class="p-3">Tickets Claimed</th>
-    <th class="p-3">Tickets Closed</th>
+    <th class="p-4">Staff ID</th>
+    <th class="p-4">Tickets Claimed</th>
+    <th class="p-4">Tickets Closed</th>
 </tr>
 </thead>
 
 <tbody>
 <% staff.forEach(s => { %>
 <tr class="border-b border-gray-700">
-    <td class="p-3"><%= s.id %></td>
-    <td class="p-3"><%= s.claimed %></td>
-    <td class="p-3"><%= s.closed %></td>
+    <td class="p-4"><%= s.id %></td>
+    <td class="p-4"><%= s.claimed %></td>
+    <td class="p-4"><%= s.closed %></td>
 </tr>
 <% }) %>
 </tbody>
 </table>
-
-`
-}) %>
