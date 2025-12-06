@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>NLF Bot Dashboard</title>
-</head>
-<body>
-    <h1>Welcome to the NLF Bot Dashboard</h1>
-    <p>This is your personal dashboard.</p>
+<%- include("layout", { title: "Home", body: `
+    <h1 class="text-4xl font-bold mb-6">Welcome to NLF Bot Dashboard</h1>
 
-    <a href="/login">Login with Discord</a>
-</body>
-</html>
+    <p class="text-gray-300 text-lg mb-8">
+        This dashboard gives you control over your bot, tickets, stats and more.
+    </p>
+
+    <a href="/login"
+       class="bg-indigo-600 px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700">
+       Login with Discord
+    </a>
+` }) %>
