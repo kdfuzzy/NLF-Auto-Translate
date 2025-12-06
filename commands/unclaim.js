@@ -3,19 +3,29 @@ const { SlashCommandBuilder } = require("discord.js");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("unclaim")
-        .setDescription("Unclaim the ticket"),
+        .setDescription("Unclaim the current ticket"),
 
-    async execute(interaction, client, config) {
-        const member = interaction.member;
+    async execute(interaction) {
         const channel = interaction.channel;
 
-        if (!member.roles.cache.some(r => config.staffRoles.includes(r.id)))
-            return interaction.reply({ content: "❌ Staff only.", ephemeral: true });
+        if (!channel.name.startsWith("ticket-")) {
+            return interaction.reply({
+                content: "❌ You can only use this command inside a ticket.",
+                ephemeral: true
+            });
+        }
 
-        if (!channel.name.startsWith("ticket-"))
-            return interaction.reply({ content: "❌ Not in a ticket.", ephemeral: true });
+        if (!channel.topic?.includes("Claimed by:")) {
+            return interaction.reply({
+                content: "❌ This ticket is not claimed.",
+                ephemeral: true
+            });
+        }
 
-        await channel.setTopic(null);
-        interaction.reply("🔄 Ticket unclaimed.");
+        await channel.setTopic(channel.topic.replace(/ \| Claimed by: .+/, ""));
+
+        return interaction.reply({
+            content: "🟦 Ticket unclaimed.",
+        });
     }
 };
