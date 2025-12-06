@@ -1,67 +1,58 @@
 const {
     ChannelType,
-    PermissionFlagsBits,
     EmbedBuilder,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle
 } = require("discord.js");
 
-const { loadJSON } = require("../utils/fileManager");
-
 module.exports = {
-    async execute(interaction, client) {
+    async execute(interaction, client, config) {
 
-        const config = loadJSON("./config/config.json");
         const guild = interaction.guild;
         const user = interaction.user;
-        const ticketType = interaction.values[0];
+        const type = interaction.values[0];
 
-        if (!config.ticketCategory) {
+        if (!config.ticketCategory)
             return interaction.reply({
-                content: "❌ Ticket category is not set. Use `/setticketcategory` first.",
+                content: "Ticket category not set. Use /setticketcategory",
                 ephemeral: true
             });
-        }
 
-        // Create synced channel
+        // Create ticket channel under category (auto sync perms)
         const channel = await guild.channels.create({
             name: `ticket-${user.username}`,
+            parent: config.ticketCategory,
             type: ChannelType.GuildText,
-            parent: config.ticketCategory, // SYNC PERMISSIONS
-            topic: `Ticket opened by ${user.tag}`
+            topic: `Ticket by ${user.tag} (${type})`
         });
 
-        // Allow the user to view their ticket
+        // Allow user to view
         await channel.permissionOverwrites.edit(user.id, {
             ViewChannel: true,
-            SendMessages: true,
-            ReadMessageHistory: true
+            SendMessages: true
         });
 
-        // Ticket embed
+        // Embed
         const embed = new EmbedBuilder()
             .setColor("Blue")
-            .setTitle("🎟 New Ticket Created")
-            .addFields(
-                { name: "📌 Ticket Type", value: ticketType, inline: true },
-                { name: "👤 User", value: `<@${user.id}>`, inline: true }
-            )
-            .setDescription("A staff member will assist you shortly.")
+            .setTitle("🎟 Ticket Created")
+            .setDescription(`Ticket type: **${type}**`)
+            .addFields({ name: "User", value: `<@${user.id}>` })
             .setTimestamp();
 
         // Buttons
         const buttons = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId("claim_ticket").setLabel("Claim").setStyle(ButtonStyle.Primary),
-            new ButtonBuilder().setCustomId("unclaim_ticket").setLabel("Unclaim").setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder().setCustomId("close_ticket").setLabel("Close").setStyle(ButtonStyle.Danger),
-            new ButtonBuilder().setCustomId("transcript_ticket").setLabel("Transcript").setStyle(ButtonStyle.Success)
+            new ButtonBuilder().setCustomId("claim_ticket").setStyle(ButtonStyle.Primary).setLabel("Claim"),
+            new ButtonBuilder().setCustomId("unclaim_ticket").setStyle(ButtonStyle.Secondary).setLabel("Unclaim"),
+            new ButtonBuilder().setCustomId("close_ticket").setStyle(ButtonStyle.Danger).setLabel("Close"),
+            new ButtonBuilder().setCustomId("transcript_ticket").setStyle(ButtonStyle.Success).setLabel("Transcript")
         );
 
         await channel.send({ embeds: [embed], components: [buttons] });
 
         return interaction.reply({
-            content: `🎫 Ticket opened: ${channel}`,
+            content: `Ticket created: ${channel}`,
             ephemeral: true
         });
     }
