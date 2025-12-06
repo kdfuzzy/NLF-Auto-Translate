@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | NLF Dashboard</title>
 
-    <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Gradient & Additional Styles -->
     <style>
         .sidebar-gradient {
             background: linear-gradient(180deg, #4f46e5, #6d28d9);
@@ -19,35 +17,22 @@
 <body class="bg-gray-900 text-white flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 h-screen sidebar-gradient p-6 flex flex-col gap-6 shadow-xl">
+    <aside class="w-64 min-h-screen sidebar-gradient p-6 flex flex-col gap-6 shadow-xl">
         <h1 class="text-2xl font-bold">NLF Panel</h1>
 
         <nav class="flex flex-col gap-3 text-lg">
-            <a href="/" class="hover:text-gray-300 flex items-center gap-2">
-                🏠 Home
-            </a>
-
-            <a href="/dashboard" class="hover:text-gray-300 flex items-center gap-2">
-                📊 Dashboard
-            </a>
-
-            <a href="/tickets" class="hover:text-gray-300 flex items-center gap-2">
-                🎟 Tickets
-            </a>
-
-            <a href="/staff" class="hover:text-gray-300 flex items-center gap-2">
-                🛠 Staff Panel
-            </a>
-
-            <a href="/logout" class="hover:text-gray-300 mt-4 flex items-center gap-2">
-                🚪 Logout
-            </a>
+            <a href="/" class="hover:text-gray-300">🏠 Home</a>
+            <a href="/dashboard" class="hover:text-gray-300">📊 Dashboard</a>
+            <a href="/tickets" class="hover:text-gray-300">🎟 Tickets</a>
+            <a href="/staff" class="hover:text-gray-300">🛠 Staff Panel</a>
+            <a href="/settings" class="hover:text-gray-300">⚙️ Settings</a>
+            <a href="/logout" class="hover:text-gray-300 mt-4">🚪 Logout</a>
         </nav>
     </aside>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 p-10">
-        <%- body %> <!-- IMPORTANT: Renders HTML, not escaped text -->
+        <%- body %>
     </main>
 
 </body>
