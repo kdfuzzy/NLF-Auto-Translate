@@ -9,10 +9,10 @@ module.exports = {
         const channel = interaction.channel;
         const user = interaction.user;
 
-        // Check if this is a ticket channel
+        // Validate channel
         if (!channel.name.startsWith("ticket-")) {
             return interaction.reply({
-                content: "❌ You can only use this command inside a ticket.",
+                content: "❌ You can only claim inside a ticket channel.",
                 ephemeral: true
             });
         }
@@ -25,7 +25,6 @@ module.exports = {
             });
         }
 
-        // Claim the ticket
         await channel.setTopic(`${channel.topic || ""} | Claimed by: ${user.tag}`);
 
         return interaction.reply({
