@@ -1,19 +1,20 @@
 const { ChannelType, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { loadJSON } = require("../utils/fileManager");
+const { loadJSON, saveJSON } = require("../utils/fileManager");
 
 module.exports = {
     async execute(interaction, client, config) {
         const guild = interaction.guild;
         const user = interaction.user;
-        const ticketType = interaction.values[0];
+        const type = interaction.values[0];
 
-        const category = config.ticketCategory;
+        // Load config again
+        config = loadJSON("./config/config.json");
 
-        // Create the ticket channel
+        // Create ticket channel
         const channel = await guild.channels.create({
             name: `ticket-${user.username}`.toLowerCase(),
             type: ChannelType.GuildText,
-            parent: category,
+            parent: config.ticketCategory,
             topic: `TICKET OPENED BY ${user.tag}`,
             permissionOverwrites: [
                 {
@@ -35,14 +36,14 @@ module.exports = {
             ]
         });
 
-        // Greeting embed
+        // Ticket embed message
         const embed = new EmbedBuilder()
-            .setTitle("🎫 New Ticket Opened")
+            .setTitle("🎟 New Ticket Opened")
             .addFields(
-                { name: "Ticket Type", value: ticketType, inline: true },
-                { name: "User", value: `<@${user.id}>`, inline: true }
+                { name: "Type", value: type, inline: true },
+                { name: "Opened By", value: `<@${user.id}>`, inline: true }
             )
-            .setDescription("Please describe your issue in as much detail as possible.\nA staff member will assist you shortly.")
+            .setDescription("Please describe your issue in detail. Staff will be with you shortly.")
             .setColor("Blue")
             .setTimestamp();
 
@@ -54,7 +55,6 @@ module.exports = {
             new ButtonBuilder().setCustomId("transcript_ticket").setLabel("Transcript").setStyle(ButtonStyle.Success)
         );
 
-        // Send welcome message
         await channel.send({ embeds: [embed], components: [buttons] });
 
         await interaction.reply({
