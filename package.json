@@ -3,16 +3,11 @@
   "version": "1.0.0",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
-    "web": "node dashboard.js"
+    "start": "node bot.js"
   },
   "dependencies": {
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.5",
-    "express": "^4.22.1",
-    "express-session": "^1.18.2",
-    "discord-oauth2": "^2.12.1",
-    "ejs": "^3.1.10",
     "@iamtraction/google-translate": "^1.2.0"
   }
 }
