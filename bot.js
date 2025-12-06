@@ -1,20 +1,7 @@
-// -------------------------------
-// MAIN BOT LOADER
-// -------------------------------
 const fs = require("fs");
-const {
-    Client,
-    GatewayIntentBits,
-    Partials,
-    Collection,
-    REST,
-    Routes
-} = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require("discord.js");
 require("dotenv").config();
 
-// -------------------------------
-// CLIENT SETUP
-// -------------------------------
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -28,96 +15,50 @@ const client = new Client({
 client.commands = new Collection();
 client.buttons = new Collection();
 
-// -------------------------------
-// LOAD CONFIG
-// -------------------------------
-const loadConfig = () =>
-    JSON.parse(fs.readFileSync("./config/config.json", "utf8"));
-client.config = loadConfig();
+// Load config
+client.config = JSON.parse(fs.readFileSync("./config/config.json"));
 
-// -------------------------------
-// LOAD COMMANDS
-// -------------------------------
-const commandFiles = fs
-    .readdirSync("./commands")
-    .filter((f) => f.endsWith(".js"));
-
+// Load commands
+const commandFiles = fs.readdirSync("./commands").filter(f => f.endsWith(".js"));
 let slashCommands = [];
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-
-    if (!command.data) {
-        console.log(`⚠️ Command "${file}" missing data property.`);
-        continue;
-    }
+    if (!command.data) continue;
 
     client.commands.set(command.data.name, command);
     slashCommands.push(command.data.toJSON());
 }
 
-console.log(`📦 Loaded ${client.commands.size} commands.`);
-
-// -------------------------------
-// LOAD BUTTON HANDLERS
-// -------------------------------
-const buttonFiles = fs
-    .readdirSync("./buttons")
-    .filter((f) => f.endsWith(".js"));
-
+// Load button handlers
+const buttonFiles = fs.readdirSync("./buttons").filter(f => f.endsWith(".js"));
 for (const file of buttonFiles) {
     const button = require(`./buttons/${file}`);
-
-    if (!button.id) {
-        console.log(`⚠️ Button "${file}" missing ID.`);
-        continue;
-    }
-
+    if (!button.id) continue;
     client.buttons.set(button.id, button);
 }
 
-console.log(`🔘 Loaded ${client.buttons.size} button handlers.`);
-
-// -------------------------------
-// LOAD EVENTS (FIXED ARG ORDER)
-// -------------------------------
-const eventFiles = fs
-    .readdirSync("./events")
-    .filter((f) => f.endsWith(".js"));
-
+// Load events
+const eventFiles = fs.readdirSync("./events").filter(f => f.endsWith(".js"));
 for (const file of eventFiles) {
     const event = require(`./events/${file}`);
-
-    if (event.once) {
-        client.once(event.name, (...args) => event.execute(...args, client));
-    } else {
-        client.on(event.name, (...args) => event.execute(...args, client));
-    }
+    client.on(event.name, (...args) => event.execute(...args, client));
 }
 
-console.log(`📡 Loaded ${eventFiles.length} events.`);
-
-// -------------------------------
-// REGISTER SLASH COMMANDS
-// -------------------------------
+// Register commands
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
-
 (async () => {
     try {
-        console.log("🔄 Registering slash commands...");
-
+        console.log("Registering slash commands…");
         await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID),
             { body: slashCommands }
         );
-
-        console.log("✅ Slash commands registered!");
+        console.log("Commands registered!");
     } catch (err) {
-        console.error("❌ Error registering commands:", err);
+        console.error(err);
     }
 })();
 
-// -------------------------------
-// LOGIN
-// -------------------------------
+// Login
 client.login(process.env.TOKEN);
