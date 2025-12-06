@@ -1,42 +1,35 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { loadJSON, saveJSON } = require("../utils/fileManager");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("claim")
-        .setDescription("Claim the ticket"),
+        .setDescription("Claim the current ticket"),
 
-    async execute(interaction, client, config) {
-        const member = interaction.member;
+    async execute(interaction) {
         const channel = interaction.channel;
+        const user = interaction.user;
 
-        if (!member.roles.cache.some(r => config.staffRoles.includes(r.id)))
-            return interaction.reply({ content: "❌ You must be staff to claim.", ephemeral: true });
-
-        if (!channel.name.startsWith("ticket-"))
-            return interaction.reply({ content: "❌ This is not a ticket channel.", ephemeral: true });
-
-        if (channel.topic && channel.topic.includes("CLAIMED"))
-            return interaction.reply({ content: "❌ Already claimed.", ephemeral: true });
-
-        // Set ticket as claimed
-        await channel.setTopic(`CLAIMED BY ${member.user.tag}`);
-
-        // ---------------------------
-        // UPDATE TICKET STATS
-        // ---------------------------
-        let stats = loadJSON("./stats/tickets.json");
-
-        if (!stats[member.id]) {
-            stats[member.id] = { daily: 0, weekly: 0, all: 0 };
+        // Check if this is a ticket channel
+        if (!channel.name.startsWith("ticket-")) {
+            return interaction.reply({
+                content: "❌ You can only use this command inside a ticket.",
+                ephemeral: true
+            });
         }
 
-        stats[member.id].daily++;
-        stats[member.id].weekly++;
-        stats[member.id].all++;
+        // Already claimed?
+        if (channel.topic?.includes("Claimed by:")) {
+            return interaction.reply({
+                content: "❌ This ticket is already claimed.",
+                ephemeral: true
+            });
+        }
 
-        saveJSON("./stats/tickets.json", stats);
+        // Claim the ticket
+        await channel.setTopic(`${channel.topic || ""} | Claimed by: ${user.tag}`);
 
-        interaction.reply(`🟦 Ticket claimed by <@${member.id}>`);
+        return interaction.reply({
+            content: `✅ Ticket claimed by <@${user.id}>.`,
+        });
     }
 };
