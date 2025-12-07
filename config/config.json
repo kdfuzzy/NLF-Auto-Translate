@@ -5,8 +5,8 @@
     "translateChannels": [],
     "ticketCategory": "1441860083402281013",
     "transcriptChannel": null,
-    "claimLocked": true
-    "altLogChannel": "", 
+    "claimLocked": true,
+    "altLogChannel": "",
     "autoKickUnderDays": 0
     
 }
