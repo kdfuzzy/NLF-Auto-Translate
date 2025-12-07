@@ -6,14 +6,24 @@ module.exports = {
         const member = await interaction.guild.members.fetch(userId).catch(() => null);
 
         if (!member) {
-            return interaction.reply({ content: "❌ User not found.", ephemeral: true });
+            return interaction.reply({
+                embeds: [{
+                    title: "❌ Error",
+                    description: "User not found.",
+                    color: 0xff2e2e
+                }],
+                ephemeral: true
+            });
         }
 
         await member.ban({ reason: "Alt detection system" });
 
-        interaction.reply({
-            content: `🔨 User <@${userId}> has been **banned**.`,
-            ephemeral: false
+        return interaction.reply({
+            embeds: [{
+                title: "🔨 User Banned",
+                description: `<@${userId}> has been banned.`,
+                color: 0xff2e2e
+            }]
         });
     }
 };
