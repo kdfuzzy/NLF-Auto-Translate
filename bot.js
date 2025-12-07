@@ -1,122 +1,139 @@
-// -------------------------
-// Clean Discord Bot Loader
-// -------------------------
+// -------------------------------
+// MAIN BOT LOADER
+// -------------------------------
 const fs = require("fs");
 const path = require("path");
-const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require("discord.js");
+const { 
+    Client, 
+    GatewayIntentBits, 
+    Partials, 
+    Collection, 
+    REST, 
+    Routes 
+} = require("discord.js");
+
 require("dotenv").config();
 
-// -------------------------
+// -------------------------------
 // CLIENT SETUP
-// -------------------------
+// -------------------------------
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ],
     partials: [Partials.Channel]
 });
 
-// Collections to store commands & buttons
+// Collections
 client.commands = new Collection();
 client.buttons = new Collection();
 
-// Load config
-client.config = JSON.parse(fs.readFileSync("./config/config.json", "utf8"));
+// -------------------------------
+// CONFIG LOADING
+// -------------------------------
+const loadConfig = () => JSON.parse(fs.readFileSync("./config/config.json"));
+client.config = loadConfig();
 
-// -------------------------
+// -----------------------------------------------------
 // LOAD COMMANDS
-// -------------------------
+// -----------------------------------------------------
 const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"));
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
 
 let slashCommands = [];
 
+console.log("COMMAND FILES FOUND:", commandFiles);
+
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
+    try {
+        const command = require(`./commands/${file}`);
 
-    if (!command.data) {
-        console.log(`⚠️ Skipped ${file}: missing "data" property.`);
-        continue;
+        if (!command.data) {
+            console.log(`⚠️ Skipped ${file}: missing "data" property.`);
+            continue;
+        }
+
+        client.commands.set(command.data.name, command);
+        slashCommands.push(command.data.toJSON());
+    } catch (err) {
+        console.log(`❌ Error loading command ${file}:`, err);
     }
-
-    client.commands.set(command.data.name, command);
-    slashCommands.push(command.data.toJSON());
 }
 
+console.log("COMMANDS LOADED:", [...client.commands.keys()]);
 console.log(`📦 Loaded ${client.commands.size} slash commands.`);
 
-// -------------------------
-// LOAD BUTTONS
-// -------------------------
+// -----------------------------------------------------
+// LOAD BUTTON HANDLERS
+// -----------------------------------------------------
 const buttonsPath = path.join(__dirname, "buttons");
-if (fs.existsSync(buttonsPath)) {
-    const buttonFiles = fs.readdirSync(buttonsPath).filter(f => f.endsWith(".js"));
+const buttonFiles = fs.readdirSync(buttonsPath).filter(file => file.endsWith(".js"));
 
-    for (const file of buttonFiles) {
+for (const file of buttonFiles) {
+    try {
         const button = require(`./buttons/${file}`);
 
+        // Button.id can be string OR RegExp
         if (!button.id) {
-            console.log(`⚠️ Skipped button ${file}: missing "id".`);
+            console.log(`⚠️ Button "${file}" missing ID`);
             continue;
         }
 
         client.buttons.set(button.id, button);
+    } catch (err) {
+        console.log(`❌ Error loading button ${file}:`, err);
     }
-
-    console.log(`🔘 Loaded ${client.buttons.size} button handlers.`);
-} else {
-    console.log("⚠️ No /buttons folder found. Skipping button loading.");
 }
 
-// -------------------------
+console.log(`🔘 Loaded ${client.buttons.size} button handlers.`);
+
+// -----------------------------------------------------
 // LOAD EVENTS
-// -------------------------
+// -----------------------------------------------------
 const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs.readdirSync(eventsPath).filter(f => f.endsWith(".js"));
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith(".js"));
 
 for (const file of eventFiles) {
-    const event = require(`./events/${file}`);
+    try {
+        const event = require(`./events/${file}`);
 
-    if (!event.name || !event.execute) {
-        console.log(`⚠️ Skipped event ${file}: missing name/execute.`);
-        continue;
+        if (event.once) {
+            client.once(event.name, (...args) => event.execute(...args, client));
+        } else {
+            client.on(event.name, (...args) => event.execute(...args, client));
+        }
+    } catch (err) {
+        console.log(`❌ Error loading event ${file}:`, err);
     }
-
-    client.on(event.name, (...args) => event.execute(...args, client));
 }
 
 console.log(`📡 Loaded ${eventFiles.length} events.`);
 
-// -------------------------
+// -----------------------------------------------------
 // REGISTER SLASH COMMANDS
-// -------------------------
+// -----------------------------------------------------
 const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
 (async () => {
     try {
         console.log("🔄 Registering slash commands...");
+        console.log("Commands being registered:", slashCommands.map(c => c.name));
 
         await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID),
             { body: slashCommands }
         );
 
-        console.log("✅ Slash commands registered!");
+        console.log("✅ Successfully registered slash commands!");
     } catch (err) {
         console.error("❌ Error registering commands:", err);
     }
 })();
 
-// -------------------------
-// BOT READY
-// -------------------------
-client.once("ready", () => {
-    console.log(`🟢 Logged in as ${client.user.tag}`);
-});
-
-// -------------------------
-// LOGIN
-// -------------------------
+// -----------------------------------------------------
+// LOGIN BOT
+// -----------------------------------------------------
 client.login(process.env.TOKEN);
