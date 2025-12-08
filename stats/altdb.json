@@ -1,0 +1,21 @@
+{
+    "users": {
+        "USERID": {
+            "id": "USERID",
+            "tag": "username#0000",
+            "username": "someuser",
+            "createdTimestamp": 0,
+            "avatarHash": null,
+            "bannerHash": null,
+            "lastJoin": 0,
+            "suspicionReported": 0,
+            "links": ["OTHER_USERID"],
+            "flags": ["Reason 1", "Reason 2"],
+            "safe": false,
+            "ignored": false,
+            "messagesSent": 0,
+            "offenderCount": 0
+        }
+    },
+    "joinHistory": []
+}
