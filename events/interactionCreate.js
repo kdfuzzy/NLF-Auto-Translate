@@ -7,28 +7,32 @@ module.exports = {
     async execute(interaction, client) {
 
         // Reload config every interaction
-        const config = loadJSON("./config/config.json");
+        let config;
+        try {
+            config = loadJSON("./config/config.json");
+        } catch (err) {
+            console.error("❌ Failed to load config.json:", err);
+            return;
+        }
 
         // =========================================================
         // BUTTON HANDLER
         // =========================================================
         if (interaction.isButton()) {
 
-            // Loop through button handlers
             for (const [id, handler] of client.buttons) {
 
-                // 1️⃣ Exact match (example: "claim_ticket")
+                // Exact ID match
                 if (typeof id === "string" && id === interaction.customId) {
                     return handler.execute(interaction, client, config);
                 }
 
-                // 2️⃣ Regex match (example: /^alt_ban_/)
+                // Regex match
                 if (id instanceof RegExp && id.test(interaction.customId)) {
                     return handler.execute(interaction, client, config);
                 }
             }
 
-            // If button has no handler
             return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
@@ -47,7 +51,8 @@ module.exports = {
             console.log("⚡ Select Menu Triggered:", interaction.customId);
 
             if (interaction.customId === "ticket_menu") {
-                const panelHandler = require("../handlers/panelHandler");
+                // ✅ FIXED PATH
+                const panelHandler = require("../commands/panelHandler");
                 return panelHandler.execute(interaction, client, config);
             }
 
@@ -81,26 +86,22 @@ module.exports = {
             }
 
             try {
-                return await command.execute(interaction, client, config);
-
+                await command.execute(interaction, client, config);
             } catch (err) {
-                console.error("❌ Slash Command Error:", err);
+                console.error(`❌ Error in /${interaction.commandName}:`, err);
 
-                return interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor("#ff2e2e")
-                            .setTitle("❌ Command Execution Failed")
-                            .setDescription("An internal error occurred while running this command.")
-                    ],
-                    ephemeral: true
-                });
+                if (!interaction.replied) {
+                    return interaction.reply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setColor("#ff2e2e")
+                                .setTitle("❌ Command Error")
+                                .setDescription("Something went wrong while executing this command.")
+                        ],
+                        ephemeral: true
+                    });
+                }
             }
         }
-
-        // =========================================================
-        // OTHER INTERACTION TYPES (future-safe)
-        // =========================================================
-        return;
     }
 };
