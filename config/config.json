@@ -4,10 +4,10 @@
     "adminRoles": [],
     "translateChannels": [],
     "ticketCategory": "1441860083402281013",
-    "transcriptChannel": null,
+    "transcriptChannel": 1438601746829283419,
     "claimLocked": true,
-    "altLogChannel": "",
-    "autoKickUnderDays": 0
+    "altLogChannel": "1447348098937524255",
+    "autoKickUnderDays": 7
     
 }
 
