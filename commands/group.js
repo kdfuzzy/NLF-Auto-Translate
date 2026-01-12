@@ -13,7 +13,7 @@ module.exports = {
             .setDescription(
                 "**Join the official NLF Roblox group below:**\n\n" +
                 "🔗 **Link:**\n" +
-                "https://www.roblox.com/communities/35970369/NLF-Official-Group#!/about](https://www.roblox.com/communities/35970369/NLF-Official-Group#!/about"
+                "https://www.roblox.com/communities/35970369/NLF-Official-Group#!/about"
             )
             .setFooter({
                 text: "NLF • Official Roblox Group"
