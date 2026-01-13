@@ -8,109 +8,145 @@ const STRIKE_LOG_CHANNEL = "1428760038658277386";
 
 // Strike roles
 const STRIKE_ROLES = {
-    1: "1430286428268531803", // Strike 1
-    2: "1430288940874731581", // Strike 2
-    3: "1430288999649644605"  // Strike 3
+    1: "1430286428268531803",
+    2: "1430288940874731581",
+    3: "1430288999649644605"
 };
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("strike")
         .setDescription("Issue a staff strike")
-        .addUserOption(option =>
-            option
-                .setName("user")
+        .addUserOption(opt =>
+            opt.setName("user")
                 .setDescription("User to strike")
                 .setRequired(true)
         )
-        .addStringOption(option =>
-            option
-                .setName("reason")
+        .addStringOption(opt =>
+            opt.setName("reason")
                 .setDescription("Reason for the strike")
                 .setRequired(true)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
+        ),
 
-    async execute(interaction) {
+    async execute(interaction, client, config) {
+        // ================= PERMISSION CHECK =================
+        if (
+            !interaction.member.roles.cache.some(r =>
+                config.staffRoles.includes(r.id)
+            ) &&
+            !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+        ) {
+            return interaction.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor("#ff2e2e")
+                        .setTitle("❌ Permission Denied")
+                        .setDescription("Only staff can issue strikes.")
+                ],
+                ephemeral: true
+            });
+        }
 
-        const target = interaction.options.getUser("user");
+        const member = interaction.options.getMember("user");
         const reason = interaction.options.getString("reason");
-        const guild = interaction.guild;
 
-        const member = await guild.members.fetch(target.id).catch(() => null);
         if (!member) {
             return interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor("#ff2e2e")
-                        .setTitle("❌ User Not Found")
-                        .setDescription("Could not find that member in this server.")
-                ],
+                content: "❌ User not found.",
                 ephemeral: true
             });
         }
 
-        // Determine current strike
-        let currentStrike = 0;
+        // ================= DETERMINE CURRENT STRIKES =================
+        let strikeCount = 0;
+        for (const [num, roleId] of Object.entries(STRIKE_ROLES)) {
+            if (member.roles.cache.has(roleId)) {
+                strikeCount = Math.max(strikeCount, Number(num));
+            }
+        }
 
-        if (member.roles.cache.has(STRIKE_ROLES[3])) currentStrike = 3;
-        else if (member.roles.cache.has(STRIKE_ROLES[2])) currentStrike = 2;
-        else if (member.roles.cache.has(STRIKE_ROLES[1])) currentStrike = 1;
-
-        if (currentStrike >= 3) {
+        if (strikeCount >= 3) {
             return interaction.reply({
                 embeds: [
                     new EmbedBuilder()
                         .setColor("#ff2e2e")
-                        .setTitle("🚫 Max Strikes Reached")
-                        .setDescription("This user already has **Strike 3**.")
+                        .setTitle("❌ Max Strikes Reached")
+                        .setDescription("This user already has 3 strikes.")
                 ],
                 ephemeral: true
             });
         }
 
-        const newStrike = currentStrike + 1;
+        const newStrike = strikeCount + 1;
 
-        // Remove old strike roles
+        // ================= REMOVE OLD STRIKE ROLES =================
         for (const roleId of Object.values(STRIKE_ROLES)) {
             if (member.roles.cache.has(roleId)) {
                 await member.roles.remove(roleId).catch(() => {});
             }
         }
 
-        // Add new strike role
-        await member.roles.add(STRIKE_ROLES[newStrike]);
+        // ================= APPLY NEW STRIKE ROLE =================
+        await member.roles.add(STRIKE_ROLES[newStrike]).catch(() => {});
 
-        // Log embed (wide + clean)
-        const logEmbed = new EmbedBuilder()
-            .setColor(newStrike === 3 ? "#ff2e2e" : "#ff9f1c")
+        // ================= STRIKE EMBED =================
+        const strikeEmbed = new EmbedBuilder()
+            .setColor("#ff9900")
             .setTitle("⚠️ Staff Strike Issued")
             .setDescription(
                 `━━━━━━━━━━━━━━━━━━━━━━\n` +
-                `👤 **User**\n<@${target.id}>\n\n` +
-                `📌 **Punishment**\nStrike ${newStrike}\n\n` +
-                `📝 **Reason**\n${reason}\n` +
+                `👤 **User:** ${member}\n` +
+                `📌 **Strike:** ${newStrike}\n` +
+                `📝 **Reason:** ${reason}\n` +
                 `━━━━━━━━━━━━━━━━━━━━━━`
             )
-            .setFooter({
-                text: `Issued by ${interaction.user.tag}`
-            })
+            .setFooter({ text: `Issued by ${interaction.user.tag}` })
             .setTimestamp();
 
-        const logChannel = guild.channels.cache.get(STRIKE_LOG_CHANNEL);
+        // ================= LOG STRIKE =================
+        const logChannel = interaction.guild.channels.cache.get(STRIKE_LOG_CHANNEL);
         if (logChannel) {
-            await logChannel.send({ embeds: [logEmbed] });
+            logChannel.send({ embeds: [strikeEmbed] });
         }
 
-        // Confirmation to command user
+        // ================= DEMOTION LOGIC =================
+        if (newStrike === 3) {
+
+            // Get roles sorted by position (highest → lowest)
+            const roleList = member.roles.cache
+                .filter(r => !r.managed && r.id !== interaction.guild.id)
+                .sort((a, b) => b.position - a.position);
+
+            // Remove highest role (demotion)
+            const highestRole = roleList.first();
+
+            if (highestRole) {
+                await member.roles.remove(highestRole);
+
+                const demoteEmbed = new EmbedBuilder()
+                    .setColor("#ff2e2e")
+                    .setTitle("⬇️ Staff Demoted")
+                    .setDescription(
+                        `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                        `👤 **User:** ${member}\n` +
+                        `📉 **Removed Role:** ${highestRole.name}\n` +
+                        `⚠️ **Reason:** Reached 3 strikes\n` +
+                        `━━━━━━━━━━━━━━━━━━━━━━`
+                    )
+                    .setTimestamp();
+
+                if (logChannel) {
+                    logChannel.send({ embeds: [demoteEmbed] });
+                }
+            }
+        }
+
         return interaction.reply({
             embeds: [
                 new EmbedBuilder()
-                    .setColor("#2ecc71")
+                    .setColor("#00ff99")
                     .setTitle("✅ Strike Issued")
-                    .setDescription(
-                        `<@${target.id}> now has **Strike ${newStrike}**.`
-                    )
+                    .setDescription(`${member} now has **${newStrike} strike(s)**.`)
             ],
             ephemeral: true
         });
